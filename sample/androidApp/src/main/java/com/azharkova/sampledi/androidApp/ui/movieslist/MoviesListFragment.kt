@@ -42,9 +42,6 @@ class MoviesListFragment : Fragment(), IMoviesListView {
     }
 
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-    }
 
     override fun onResume() {
         super.onResume()

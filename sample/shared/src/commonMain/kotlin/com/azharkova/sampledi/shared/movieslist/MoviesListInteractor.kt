@@ -32,7 +32,7 @@ class MoviesListInteractor:BaseInteractor<IMoviesListView>(uiDispatcher),IMovies
    override fun loadMovies() {
         scope.launch {
             print(moviesService == null)
-            val result = moviesService?.loadMovies()?.results
+            val result = moviesService?.loadMovies()?.getOrNull()?.results
             moviesList = arrayListOf()
             moviesList.addAll(result ?: arrayListOf())
             presenter?.setup(moviesList)

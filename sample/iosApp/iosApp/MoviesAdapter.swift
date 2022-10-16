@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import shared
 
-protocol  TableOwner : class {
+protocol  TableOwner : AnyObject {
     func select(index: Int)
 }
 

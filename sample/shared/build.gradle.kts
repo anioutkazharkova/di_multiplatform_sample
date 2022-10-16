@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -8,33 +6,35 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
+    mavenCentral()
 }
 
 kotlin {
     android()
-    ios {
-        binaries {
-            framework {
-                baseName = "shared"
-            }
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "shared"
         }
     }
     sourceSets {
-        val ktorVersion = "1.4.0"
-        val serializationVersion = "1.0.0-RC"
-        val coroutinesVersion = "1.3.9-native-mt"
-
+        val ktorVersion = "2.0.1"
         val commonMain by getting {
             dependencies {
-                implementation("com.azharkova:di-multiplatform-lib:1.0.4.5")
+                implementation("io.ktor:ktor-client-logging:$ktorVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                implementation("io.github.anioutkazharkova:di-multiplatform-lib:1.2.0")
+implementation("io.ktor:ktor-client-serialization:$ktorVersion")
             }
         }
         val commonTest by getting {
@@ -45,8 +45,7 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
-                implementation("io.ktor:ktor-client-android:$ktorVersion")
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
                 implementation("com.google.android.material:material:1.2.1")
             }
         }
@@ -56,35 +55,27 @@ kotlin {
                 implementation("junit:junit:4.13")
             }
         }
-        val iosMain by getting {
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain)
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
             dependencies {
                 implementation("io.ktor:ktor-client-ios:$ktorVersion")
             }
         }
-        val iosTest by getting
     }
 }
 
 android {
-    compileSdkVersion(29)
+    compileSdkVersion(32)
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdkVersion(24)
-        targetSdkVersion(29)
+        targetSdkVersion(32)
     }
+    namespace = "com.azharkova.sampledi.shared"
 }
-
-val packForXcode by tasks.creating(Sync::class) {
-    group = "build"
-    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
-    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
-    val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
-    inputs.property("mode", mode)
-    dependsOn(framework.linkTask)
-    val targetDir = File(buildDir, "xcode-frameworks")
-    from({ framework.outputDirectory })
-    into(targetDir)
-}
-
-tasks.getByName("build").dependsOn(packForXcode)

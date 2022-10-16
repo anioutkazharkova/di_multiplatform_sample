@@ -1,16 +1,15 @@
 buildscript {
     repositories {
         gradlePluginPortal()
-        jcenter()
         google()
         mavenCentral()
         mavenLocal()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32")
-        classpath("com.android.tools.build:gradle:4.0.1")
-        classpath ("com.google.dagger:hilt-android-gradle-plugin:2.33-beta")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:1.4.21")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
+        classpath("com.android.tools.build:gradle:7.3.1")
+        classpath ("com.google.dagger:hilt-android-gradle-plugin:2.44")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.7.20")
 
     }
 }
@@ -18,7 +17,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
         mavenLocal()
         maven(url = "https://jitpack.io")
